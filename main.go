@@ -14,10 +14,11 @@ type apiConfig struct {
 func main() {
 	cfg := &apiConfig{}
 	mux := http.NewServeMux()
-	mux.HandleFunc("/healthz", healthz)
 	handler := http.StripPrefix("/app", http.FileServer(http.Dir(".")))
 	mux.Handle("/app/", cfg.middlewareMetricsInc(handler))
-	mux.HandleFunc("/metrics", cfg.handlerMetrics)
+	mux.HandleFunc("GET /healthz", healthz)
+	mux.HandleFunc("GET /metrics", cfg.handlerMetrics)
+	mux.HandleFunc("POST /reset", cfg.handlerReset)
 	srv := &http.Server{
 		Addr:    ":8080",
 		Handler: mux,
@@ -43,4 +44,10 @@ func (cfg *apiConfig) handlerMetrics(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", "text/plain; charset=utf-8")
     w.WriteHeader(http.StatusOK)
     w.Write([]byte(fmt.Sprintf("Hits: %d", hits)))
+}
+func (cfg *apiConfig) handlerReset(w http.ResponseWriter, r *http.Request) {
+    cfg.fileserverHits.Store(0)
+    w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+    w.WriteHeader(http.StatusOK)
+    w.Write([]byte("OK"))
 }
