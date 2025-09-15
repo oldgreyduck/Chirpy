@@ -56,7 +56,6 @@ func (cfg *apiConfig) handlerReset(w http.ResponseWriter, r *http.Request) {
     w.Write([]byte("OK"))
 }
 
-// go
 func validate_chirp(w http.ResponseWriter, r *http.Request) {
     type parameters struct {
         Body string `json:"body"`
@@ -79,7 +78,8 @@ func validate_chirp(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    dat, _ := json.Marshal(map[string]bool{"valid": true})
-    w.WriteHeader(http.StatusOK)
-    w.Write(dat)
+    cleaned := cleanChirp(params.Body)
+    _ = respondWithJSON(w, http.StatusOK, map[string]string{
+        "cleaned_body": cleaned,
+    })
 }
