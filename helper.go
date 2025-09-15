@@ -3,7 +3,14 @@ package main
 import (
 	"net/http"
 	"encoding/json"
+	"strings"
 )
+
+var bannedWords = map[string]struct{}{
+    "kerfuffle": {},
+    "sharbert":  {},
+    "fornax":    {},
+}
 
 
 func respondWithError(w http.ResponseWriter, code int, msg string) error {
@@ -30,5 +37,11 @@ func respondWithJSON(w http.ResponseWriter, code int, payload any) error {
 }
 
 func cleanChirp(body string) string {
-	//...
+    parts := strings.Split(body, " ")
+    for i, p := range parts {
+        if _, ok := bannedWords[strings.ToLower(p)]; ok {
+            parts[i] = "****"
+        }
+    }
+    return strings.Join(parts, " ")
 }
