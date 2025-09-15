@@ -61,20 +61,14 @@ func validate_chirp(w http.ResponseWriter, r *http.Request) {
         Body string `json:"body"`
     }
 
-    w.Header().Set("Content-Type", "application/json")
-
     var params parameters
     if err := json.NewDecoder(r.Body).Decode(&params); err != nil || params.Body == "" {
-        dat, _ := json.Marshal(map[string]string{"error": "Something went wrong"})
-        w.WriteHeader(http.StatusBadRequest)
-        w.Write(dat)
+        respondWithError(w, http.StatusBadRequest, "Something went wrong")
         return
     }
 
     if len(params.Body) > 140 {
-        dat, _ := json.Marshal(map[string]string{"error": "Chirp is too long"})
-        w.WriteHeader(http.StatusBadRequest)
-        w.Write(dat)
+        respondWithError(w, http.StatusBadRequest, "Chirp is too long")
         return
     }
 
